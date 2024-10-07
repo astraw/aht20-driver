@@ -281,7 +281,7 @@ impl SensorReading {
 
 /// Driver errors.
 #[derive(Debug, PartialEq)]
-pub enum Error<E> {
+pub enum Error<E: embedded_hal::i2c::Error> {
     /// I2C bus error
     I2c(E),
     /// CRC validation failed
@@ -294,10 +294,10 @@ pub enum Error<E> {
     Internal,
 }
 
-impl<E> core::fmt::Display for Error<E> {
+impl<E: embedded_hal::i2c::Error> core::fmt::Display for Error<E> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         match self {
-            Error::I2c(_e) => write!(f, "I2C error"),
+            Error::I2c(e) => write!(f, "I2C error {e:?}"),
             Error::InvalidCrc => write!(f, "invalid CRC error"),
             Error::UnexpectedBusy => write!(f, "unexpected busy error"),
             Error::Internal => write!(f, "internal ATH20 driver error"),
@@ -305,7 +305,7 @@ impl<E> core::fmt::Display for Error<E> {
     }
 }
 
-impl<E> core::error::Error for Error<E> where E: core::fmt::Debug {}
+impl<E: embedded_hal::i2c::Error> core::error::Error for Error<E> {}
 
 /// An AHT20 sensor on the I2C bus `I`.
 ///
